@@ -564,7 +564,249 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# --------------------------------------------------
+# CAPÍTULO 5 — Deployment (níveis de risco + projecção)
+# --------------------------------------------------
+st.markdown("""
+<div class="section">
+    <div class="chapter-label">Capítulo 5</div>
+    <div class="section-title">Deployment</div>
+    <div class="section-body">
+        O modelo Random Forest foi aplicado a cenários de monitorização contínua e
+        a tráfego "futuro" (últimos 20% do dataset, ordenado cronologicamente),
+        simulando a operação real num SOC.
+    </div>
+    <div class="card-grid card-grid-4" style="margin-bottom:24px;">
+        <div class="card card-accent-red">
+            <div class="card-title">Porto Mais Atacado</div>
+            <div class="card-value red">80 (HTTP)</div>
+            <div class="card-desc">182.964 anomalias — DoS e Web Attacks</div>
+        </div>
+        <div class="card card-accent-red">
+            <div class="card-title">Pico de Anomalias</div>
+            <div class="card-value red">Wednesday · 30,9%</div>
+            <div class="card-desc">DoS/DDoS massivo correctamente detectado</div>
+        </div>
+        <div class="card card-accent-orange">
+            <div class="card-title">Fluxos Críticos</div>
+            <div class="card-value orange">9,3%</div>
+            <div class="card-desc">29.496 fluxos com p ≥ 0,80 — alerta imediato</div>
+        </div>
+        <div class="card card-accent-blue">
+            <div class="card-title">Projecção Dia 5</div>
+            <div class="card-value blue">10,9% ± 3,0%</div>
+            <div class="card-desc">Tendência estabilizada após o pico</div>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-from pathlib import Path
-st.write(Path(__file__).parent.parent)
-st.write(list(Path(__file__).parent.parent.glob("fig*.png")))
+# --------------------------------------------------
+# Top Portos + Previsão por dia
+# --------------------------------------------------
+fig16 = load_img("fig16.png")
+fig17 = load_img("fig17.png")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    if fig16:
+        st.markdown(f"""
+        <div style="padding:0 8px 32px 80px;">
+        <div class="chart-wrap">
+            <img src="data:image/png;base64,{fig16}" style="width:100%;display:block;">
+            <div class="chart-caption">Figura 16 — Top 10 portos de destino: 80 (HTTP) e 443 (HTTPS) dominam as anomalias</div>
+        </div></div>""", unsafe_allow_html=True)
+
+with col2:
+    if fig17:
+        st.markdown(f"""
+        <div style="padding:0 80px 32px 8px;">
+        <div class="chart-wrap">
+            <img src="data:image/png;base64,{fig17}" style="width:100%;display:block;">
+            <div class="chart-caption">Figura 17 — Monitorização contínua: Wednesday concentra 213.977 anomalias (30,9%)</div>
+        </div></div>""", unsafe_allow_html=True)
+
+# --------------------------------------------------
+# Distribuição de risco + Tendência/Projecção
+# --------------------------------------------------
+fig18 = load_img("fig18.png")
+fig19 = load_img("fig19.png")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    if fig18:
+        st.markdown(f"""
+        <div style="padding:0 8px 32px 80px;">
+        <div class="chart-wrap">
+            <img src="data:image/png;base64,{fig18}" style="width:100%;display:block;">
+            <div class="chart-caption">Figura 18 — Distribuição de risco em tráfego futuro: 84,9% Baixo · 9,3% Crítico</div>
+        </div></div>""", unsafe_allow_html=True)
+
+with col2:
+    if fig19:
+        st.markdown(f"""
+        <div style="padding:0 80px 32px 8px;">
+        <div class="chart-wrap">
+            <img src="data:image/png;base64,{fig19}" style="width:100%;display:block;">
+            <div class="chart-caption">Figura 19 — Tendência de risco e projecção: estabilização em ~10,9% para o Dia 5</div>
+        </div></div>""", unsafe_allow_html=True)
+
+st.markdown("""
+<div style="padding:0 80px 32px;">
+    <div class="insight">
+        <strong>Triagem por nível de risco:</strong> a separação clara entre fluxos de baixo risco (84,9%)
+        e críticos (9,3%) permite priorizar a atenção dos analistas L1 nos casos com maior
+        probabilidade de anomalia, em vez de uma triagem indiferenciada de todo o tráfego —
+        <strong>redução directa da carga operacional do SOC</strong>.
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# --------------------------------------------------
+# CAPÍTULO 6 — EDA (bónus)
+# --------------------------------------------------
+st.markdown("""
+<div class="section">
+    <div class="chapter-label">Capítulo 6</div>
+    <div class="section-title">EDA — Análise Exploratória (Bónus)</div>
+    <div class="section-body">
+        Antes da modelação, a análise exploratória das 17 features de pseudo-labelling
+        já revelava diferenças claras entre tráfego Normal e Anómalo — a base que tornou
+        possível todo o pipeline de detecção.
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# --------------------------------------------------
+# CDF por classe
+# --------------------------------------------------
+fig07 = load_img("fig07.png")
+
+if fig07:
+    st.markdown(f"""
+    <div style="padding:0 80px 32px;">
+    <div class="chart-wrap">
+        <img src="data:image/png;base64,{fig07}" style="width:100%;display:block;">
+        <div class="chart-caption">Figura 7 — Distribuição Acumulada (CDF): curvas afastadas indicam features discriminativas</div>
+    </div></div>""", unsafe_allow_html=True)
+
+# --------------------------------------------------
+# Boxplots + Violin Plot
+# --------------------------------------------------
+fig03 = load_img("fig03.png")
+fig04 = load_img("fig04.png")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    if fig03:
+        st.markdown(f"""
+        <div style="padding:0 8px 32px 80px;">
+        <div class="chart-wrap">
+            <img src="data:image/png;base64,{fig03}" style="width:100%;display:block;">
+            <div class="chart-caption">Figura 3 — Boxplots por classe: outliers e dispersão evidenciam padrões de anomalia</div>
+        </div></div>""", unsafe_allow_html=True)
+
+with col2:
+    if fig04:
+        st.markdown(f"""
+        <div style="padding:0 80px 32px 8px;">
+        <div class="chart-wrap">
+            <img src="data:image/png;base64,{fig04}" style="width:100%;display:block;">
+            <div class="chart-caption">Figura 4 — Violin Plot: densidade de probabilidade revela diferenças de distribuição entre classes</div>
+        </div></div>""", unsafe_allow_html=True)
+
+st.markdown("""
+<div style="padding:0 80px 32px;">
+    <div class="insight">
+        <strong>EDA como fundamento:</strong> a separação visível entre classes nas distribuições de
+        Flow Duration, Flow IAT e Packet Length — já identificável nesta fase exploratória —
+        antecipou as features que viriam a dominar a Feature Importance do modelo final
+        (Subflow Bwd Bytes, Fwd IAT Total, Average Packet Size).
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# --------------------------------------------------
+# FOOTER
+# --------------------------------------------------
+st.markdown("""
+<style>
+.footer {
+    background: linear-gradient(180deg, #1a2233 0%, #0a0f1a 100%);
+    padding: 50px 80px 40px;
+    border-top: 1px solid #2e3f5c;
+}
+.footer-eyebrow {
+    font-size: 11px; font-weight: 600; letter-spacing: 3px;
+    color: #5b8dd9; text-transform: uppercase; margin-bottom: 16px;
+}
+.footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 32px;
+    margin-bottom: 32px;
+}
+.footer-title {
+    font-size: 11px; font-weight: 700; color: #d0d8e8;
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;
+}
+.footer-text {
+    font-size: 13px; color: #6b7a8d; line-height: 1.7;
+}
+.footer-text a { color: #5b8dd9; text-decoration: none; }
+.footer-text a:hover { text-decoration: underline; }
+.footer-mono {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; color: #8899aa;
+}
+.footer-bottom {
+    font-size: 11px; color: #3d5278;
+    border-top: 1px solid #2e3f5c;
+    padding-top: 16px;
+    display: flex; justify-content: space-between;
+    flex-wrap: wrap; gap: 8px;
+}
+</style>
+
+<div class="footer">
+    <div class="footer-eyebrow">🛡️ ISCTE — Data Science & Business Analytics · Jun/2026</div>
+    <div class="footer-grid">
+        <div>
+            <div class="footer-title">Anomaly Classifier — CICIDS2017</div>
+            <div class="footer-text">
+                Pipeline de detecção de anomalias em tráfego de rede combinando
+                pseudo-labelling não supervisionado (Isolation Forest + Local Outlier Factor,
+                consenso ponderado) com classificação supervisionada
+                (Random Forest + Logistic Regression), avaliado contra ground truth
+                real com split temporal 80/20.
+            </div>
+        </div>
+        <div>
+            <div class="footer-title">Projecto</div>
+            <div class="footer-text">
+                Projeto Aplicado em Ciência dos Dados<br>e Analítica de Negócio<br>
+                ISCTE — Instituto Universitário de Lisboa<br>
+                Prof. Ricardo Ferreira
+            </div>
+        </div>
+        <div>
+            <div class="footer-title">Recursos</div>
+            <div class="footer-text footer-mono">
+                <a href="https://github.com/RiSantos79/anomaly_classifier" target="_blank">
+                    github.com/RiSantos79/<br>anomaly_classifier
+                </a>
+            </div>
+            <div class="footer-text" style="margin-top:10px;">
+                Dataset: CICIDS2017<br>(CIC, University of New Brunswick)
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <span>Ricardo Santos · Cibersegurança & Ciência de Dados · Lisboa, Portugal</span>
+        <span class="footer-mono">Streamlit · pandas · scikit-learn · matplotlib</span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
