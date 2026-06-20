@@ -192,6 +192,17 @@ st.markdown(f"""
 
     button[data-baseweb="tab"] {{ font-size: 14px; font-weight: 600; }}
     div[data-baseweb="tab-list"] {{ gap: 4px; padding: 0 24px; }}
+
+    /* Forçar tooltip escuro do Plotly — contorna sobreposições de estilo do Streamlit Cloud */
+    .hoverlayer .hovertext path,
+    .hoverlayer .hovertext rect {{
+        fill: {CARD_BG} !important;
+        stroke: {GRID} !important;
+        opacity: 1 !important;
+    }}
+    .hoverlayer .hovertext text {{
+        fill: {TEXT} !important;
+    }}
 </style>
 """, unsafe_allow_html=True)
 
