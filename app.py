@@ -543,13 +543,15 @@ Esta separação evita *data leakage*: as métricas de desempenho apresentadas n
                 )
                 fig_portos.update_layout(
                     **{k: v for k, v in PLOTLY_LAYOUT.items() if k != "margin"},
-                    title=dict(text="Portos com Maior Volume de Anomalias (Prioridades de Investigação)",
+                    title=dict(text="<b>Portos com Maior Volume de Anomalias (Prioridades de Investigação)</b>",
                                 x=0.01, xanchor="left", y=0.97, yanchor="top", font=dict(size=20, color=TEXT)),
                     height=460, margin=dict(l=16, r=16, t=60, b=16),
                 )
                 fig_portos.update_yaxes(type="category")
                 st.plotly_chart(fig_portos, use_container_width=True, config={"displayModeBar": False}, theme=None)
                 st.caption("Identifica os portos mais associados a comportamento anómalo, permitindo priorizar investigação no SOC.")
+                with st.expander("💡 Como interpretar este gráfico"):
+                    st.markdown("Quando a concentração de anomalias está esmagadoramente num único porto — especialmente se for um porto não documentado ou fora dos serviços habituais da organização — isso é tipicamente sinal de exfiltração de dados ou comunicação com infraestrutura de comando e controlo (C2), e deve ser investigado antes de qualquer outro alerta nesta vista.")
             else:
                 st.info("Nenhuma anomalia prevista com os filtros atuais.")
             st.markdown('</div>', unsafe_allow_html=True)
@@ -567,12 +569,14 @@ Esta separação evita *data leakage*: as métricas de desempenho apresentadas n
             ))
             fig_cm.update_layout(
                 **{k: v for k, v in PLOTLY_LAYOUT.items() if k != "margin"},
-                title=dict(text=f"Qualidade de Deteção de Anomalias — {modelo_label}",
+                title=dict(text=f"<b>Qualidade de Deteção de Anomalias — {modelo_label}</b>",
                             x=0.01, xanchor="left", y=0.97, yanchor="top", font=dict(size=20, color=TEXT)),
                 xaxis_title="Previsto", yaxis_title="Real", height=460, margin=dict(l=16, r=16, t=60, b=16),
             )
             st.plotly_chart(fig_cm, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption(f"Mostra a capacidade do modelo em identificar tráfego anómalo e normal, destacando falsos negativos e falsos positivos. **Precision: {prec:.3f} · Recall: {rec:.3f} · F1: {f1:.3f}**")
+            with st.expander("💡 Como interpretar este gráfico"):
+                st.markdown("O quadrante de Falsos Negativos (FN) merece sempre mais atenção do que os restantes três — representa ataques reais que o modelo deixou passar como tráfego normal. Um FN elevado, mesmo acompanhado de Precision alta, é sinal de um modelo demasiado conservador, que prefere não alarmar a arriscar falsos positivos — e isso tem um custo direto em segurança.")
             st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown("<div class='section-title'>Tipos de Ataque — Detecção por Classe</div>", unsafe_allow_html=True)
@@ -595,7 +599,7 @@ Esta separação evita *data leakage*: as métricas de desempenho apresentadas n
             fig_tipos.update_layout(
                 **{k: v for k, v in PLOTLY_LAYOUT.items() if k not in ("legend", "margin")},
                 title=dict(
-                    text="Composição do Tráfego por Tipo (Base para Avaliação do Modelo)",
+                    text="<b>Composição do Tráfego por Tipo (Base para Avaliação do Modelo)</b>",
                     x=0.01,
                     xanchor="left",
                     y=0.97,
@@ -615,6 +619,8 @@ Esta separação evita *data leakage*: as métricas de desempenho apresentadas n
             )
             st.plotly_chart(fig_tipos, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption("Apresenta a distribuição real de tráfego, evidenciando o desbalanceamento entre classes.")
+            with st.expander("💡 Como interpretar este gráfico"):
+                st.markdown("Este desbalanceamento acentuado (a esmagadora maioria do tráfego é tráfego normal) é a razão pela qual a Accuracy isolada pode ser uma métrica enganadora neste contexto — um modelo que classificasse tudo como \"normal\" teria Accuracy elevada, mas seria operacionalmente inútil. É por isso que o dashboard dá mais peso a Recall e F1, que refletem melhor o desempenho real na deteção da classe minoritária (Anómalo).")
             st.markdown('</div>', unsafe_allow_html=True)
 
         with c8:
@@ -654,7 +660,7 @@ Esta separação evita *data leakage*: as métricas de desempenho apresentadas n
                 fig_recall.update_layout(
                     **{k: v for k, v in PLOTLY_LAYOUT.items() if k not in ("legend", "margin")},
                     title=dict(
-                        text="Capacidade de Deteção por Tipo de Ataque (Pontos Fortes vs Falhas)",
+                        text="<b>Capacidade de Deteção por Tipo de Ataque (Pontos Fortes vs Falhas)</b>",
                         x=0.01,
                         xanchor="left",
                         y=0.97,
@@ -675,6 +681,8 @@ Esta separação evita *data leakage*: as métricas de desempenho apresentadas n
                 fig_recall.update_xaxes(range=[0, 122], showgrid=False, zeroline=False, showline=False, tickcolor=TEXT, color=TEXT)
                 st.plotly_chart(fig_recall, use_container_width=True, config={"displayModeBar": False}, theme=None)
                 st.caption("Permite identificar em que tipos de ataque o modelo tem melhor e pior desempenho.")
+                with st.expander("💡 Como interpretar este gráfico"):
+                    st.markdown("Tipos de ataque na zona \"Fraca\" (<50%) representam o maior risco residual — o tráfego normal continua a ser monitorizado, mas estes ataques específicos passam frequentemente despercebidos ao modelo, justificando reforço manual ou regras complementares no SIEM.")
             else:
                 st.info("Sem anomalias reais no subset filtrado para calcular taxa de detecção.")
             st.markdown('</div>', unsafe_allow_html=True)
@@ -882,7 +890,7 @@ Os valores apresentados nesta aba combinam dados de **Treino**, **Teste** e **Fo
             fig_linha.update_layout(
                 **layout_linha,
                 title=dict(
-                    text="Evolução Temporal de Anomalias e Projeção de Risco",
+                    text="<b>Evolução Temporal de Anomalias e Projeção de Risco</b>",
                     x=0.01,
                     xanchor="left",
                     y=0.97,
@@ -902,6 +910,8 @@ Os valores apresentados nesta aba combinam dados de **Treino**, **Teste** e **Fo
             )
             st.plotly_chart(fig_linha, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption("Mostra a tendência ao longo dos dias e a projeção para o próximo período (regressão linear sobre os dias filtrados, com intervalo de incerteza de ±3%). A zona sombreada destaca o dia de pico de atividade anómala.")
+            with st.expander("💡 Como interpretar este gráfico"):
+                st.markdown("Uma tendência sustentada de subida ao longo de vários dias é mais relevante operacionalmente do que um pico isolado — pode justificar reforço temporário da equipa SOC nesse período.")
             st.markdown('</div>', unsafe_allow_html=True)
 
         with c2:
@@ -938,7 +948,7 @@ Os valores apresentados nesta aba combinam dados de **Treino**, **Teste** e **Fo
             fig_risco_dia.update_layout(
                 **layout_risco_dia,
                 title=dict(
-                    text="Distribuição de Risco por Dia (Impacto Operacional)",
+                    text="<b>Distribuição de Risco por Dia (Impacto Operacional)</b>",
                     x=0.01,
                     xanchor="left",
                     y=0.97,
@@ -960,6 +970,8 @@ Os valores apresentados nesta aba combinam dados de **Treino**, **Teste** e **Fo
             )
             st.plotly_chart(fig_risco_dia, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption("Quantifica a percentagem de tráfego classificado por nível de risco ao longo dos dias. Valores ≤4% não são rotulados para evitar sobreposição — passar o rato sobre a barra para ver o valor exato. A zona sombreada destaca o dia de pico de atividade anómala.")
+            with st.expander("💡 Como interpretar este gráfico"):
+                st.markdown("Um aumento da fatia \"Crítico\" face aos restantes dias é o sinal mais direto de que esse dia exigiu (ou exige, se for hoje) atenção prioritária da equipa.")
             st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown("<div class='section-title'>Distribuição e Risco</div>", unsafe_allow_html=True)
@@ -989,7 +1001,7 @@ Os valores apresentados nesta aba combinam dados de **Treino**, **Teste** e **Fo
                                 annotation_font=dict(color=TEXT_MUTED, size=10))
             fig_box.update_layout(
                 **{k: v for k, v in PLOTLY_LAYOUT.items() if k != "margin"},
-                title=dict(text="Distribuição de Confiança do Modelo por Tipo de Tráfego (cor = risco predominante)",
+                title=dict(text="<b>Distribuição de Confiança do Modelo por Tipo de Tráfego (cor = risco predominante)</b>",
                             x=0.01, xanchor="left", y=0.97, yanchor="top", font=dict(size=20, color=TEXT)),
                 showlegend=False, height=460, xaxis_tickangle=-30, xaxis_title=None,
                 margin=dict(l=16, r=16, t=60, b=16),
@@ -997,6 +1009,8 @@ Os valores apresentados nesta aba combinam dados de **Treino**, **Teste** e **Fo
             fig_box.update_traces(marker_size=3)
             st.plotly_chart(fig_box, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption("Analisa como o modelo atribui probabilidades às diferentes classes. A linha tracejada marca o threshold de decisão (0.5).")
+            with st.expander("💡 Como interpretar este gráfico"):
+                st.markdown("Tipos de tráfego cuja mediana de probabilidade está muito próxima do threshold são os mais \"instáveis\" do ponto de vista do modelo — pequenas variações no tráfego, ou um simples ajuste do threshold de decisão, podem fazê-los mudar de classificação. Vale a pena monitorizá-los com mais atenção do que tipos de tráfego com distribuições claramente afastadas do threshold.")
             st.markdown('</div>', unsafe_allow_html=True)
 
         with c4:
@@ -1091,12 +1105,14 @@ Os valores apresentados nesta aba combinam dados de **Treino**, **Teste** e **Fo
             fig_gauges.update_yaxes(visible=False, range=[Y_LEGENDA - 0.3, Y_CENTRO_GAUGE + R_OUT + 0.2], scaleanchor="x", scaleratio=1)
             fig_gauges.update_layout(
                 **{k: v for k, v in PLOTLY_LAYOUT.items() if k not in ("xaxis", "yaxis", "margin")},
-                title=dict(text=f"Distribuição de Risco — {modelo_label_t}",
+                title=dict(text=f"<b>Distribuição de Risco — {modelo_label_t}</b>",
                             x=0.01, xanchor="left", y=0.97, yanchor="top", font=dict(size=20, color=TEXT)),
                 height=460, margin=dict(l=16, r=16, t=60, b=16),
             )
             st.plotly_chart(fig_gauges, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption("Percentagem de fluxos classificados por cada nível de risco. O arco colorido mostra a proporção de cada categoria no total filtrado.")
+            with st.expander("💡 Como interpretar este gráfico"):
+                st.markdown("Um crescimento sustentado das fatias Crítico e Alto ao longo de vários dias consecutivos — mais do que um valor pontual elevado num único dia — é o sinal mais fiável de que a postura de risco da rede está genuinamente a deteriorar-se, e não apenas a sofrer uma flutuação normal, justificando uma revisão de prioridades operacionais.")
             st.markdown('</div>', unsafe_allow_html=True)
         st.markdown("<div class='section-title'>📌 Insights e Recomendações</div>", unsafe_allow_html=True)
         st.markdown("<div class='crit-bar yellow'></div>", unsafe_allow_html=True)
@@ -1256,7 +1272,7 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
             fig_dumb.update_layout(
                 **layout_dumb,
                 title=dict(
-                    text="Comparação de Modelos (Decisão de Produção)",
+                    text="<b>Comparação de Modelos (Decisão de Produção)</b>",
                     x=0.01,
                     xanchor="left",
                     y=0.97,
@@ -1279,6 +1295,8 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
             )
             st.plotly_chart(fig_dumb, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption("Compara o desempenho dos modelos para apoiar a decisão de deployment.")
+            with st.expander("💡 Como interpretar este gráfico"):
+                st.markdown("Quando os pontos de Random Forest e Logistic Regression aparecem próximos nas várias métricas, a diferença de desempenho por si só pode não ser suficiente para decidir qual produtizar — nesses casos, a decisão deve pesar também critérios fora deste gráfico, como latência de inferência em produção, facilidade de interpretar as previsões (relevante para auditoria) ou custo computacional de re-treino.")
             st.markdown('</div>', unsafe_allow_html=True)
 
         with c10:
@@ -1301,7 +1319,7 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
             fig_roc.update_layout(
                 **layout_roc,
                 title=dict(
-                    text="Capacidade de Separação entre Classes (ROC-AUC)",
+                    text="<b>Capacidade de Separação entre Classes (ROC-AUC)</b>",
                     x=0.01,
                     xanchor="left",
                     y=0.97,
@@ -1322,6 +1340,8 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
             )
             st.plotly_chart(fig_roc, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption("Avalia a capacidade do modelo separar tráfego normal de anómalo. O 'x' marca o ponto correspondente ao threshold de decisão atual (0.5).")
+            with st.expander("💡 Como interpretar este gráfico"):
+                st.markdown("Quanto mais a curva se aproxima do canto superior esquerdo, melhor a separação entre classes. Se o ponto do threshold atual estiver visivelmente afastado da zona mais \"eficiente\" da curva (o cotovelo, onde o ganho de Recall já não compensa o custo em FPR), isso é um indício de que vale a pena testar outros valores de threshold antes de finalizar o modelo para produção.")
             st.markdown('</div>', unsafe_allow_html=True)
 
         c11, c12 = st.columns(2)
@@ -1340,7 +1360,7 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
             fig_violin.update_layout(
                 **{k: v for k, v in PLOTLY_LAYOUT.items() if k not in ("legend", "margin")},
                 title=dict(
-                    text="Distribuição de Probabilidade por Risco — Random Forest",
+                    text="<b>Distribuição de Probabilidade por Risco — Random Forest</b>",
                     x=0.01,
                     xanchor="left",
                     y=0.97,
@@ -1360,6 +1380,8 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
             )
             st.plotly_chart(fig_violin, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption("Distribuição das probabilidades de anomalia atribuídas pelo Random Forest, por nível de risco. A linha horizontal representa a mediana; a caixa central o intervalo interquartil. A linha tracejada marca o threshold de decisão (0.5).")
+            with st.expander("💡 Como interpretar este gráfico"):
+                st.markdown("Uma distribuição muito espalhada dentro de um único nível de risco (em vez de bem concentrada) revela que a fronteira entre essa categoria e a vizinha não é nítida para o modelo — esses limiares de classificação de risco são bons candidatos a revisão, sobretudo se o espalhamento atravessar o threshold de decisão.")
             st.markdown('</div>', unsafe_allow_html=True)
 
         with c12:
@@ -1376,7 +1398,7 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
             fig_violin_lr.update_layout(
                 **{k: v for k, v in PLOTLY_LAYOUT.items() if k not in ("legend", "margin")},
                 title=dict(
-                    text="Distribuição de Probabilidade por Risco — Logistic Regression",
+                    text="<b>Distribuição de Probabilidade por Risco — Logistic Regression</b>",
                     x=0.01,
                     xanchor="left",
                     y=0.97,
@@ -1396,6 +1418,8 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
             )
             st.plotly_chart(fig_violin_lr, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption("Distribuição das probabilidades de anomalia atribuídas pela Logistic Regression, por nível de risco. A linha horizontal representa a mediana; a caixa central o intervalo interquartil. A linha tracejada marca o threshold de decisão (0.5).")
+            with st.expander("💡 Como interpretar este gráfico"):
+                st.markdown("Comparada com o Random Forest, uma maior dispersão aqui é expectável — a Logistic Regression assume fronteiras de decisão lineares, por isso tende a ser menos \"confiante\" em zonas de maior complexidade no espaço de features. Isto reforça a relevância de comparar este gráfico lado a lado com o equivalente do Random Forest.")
             st.markdown('</div>', unsafe_allow_html=True)
 
         def construir_sankey(y_true, y_pred, modelo_nome):
@@ -1432,7 +1456,7 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
             ))
             fig_sankey.update_layout(
                 **{k: v for k, v in PLOTLY_LAYOUT.items() if k not in ("xaxis", "yaxis", "margin")},
-                title=dict(text=f"Fluxo de Classificação (Erros Críticos e Acertos) — {modelo_nome}",
+                title=dict(text=f"<b>Fluxo de Classificação (Erros Críticos e Acertos) — {modelo_nome}</b>",
                             x=0.01, xanchor="left", y=0.97, yanchor="top", font=dict(size=20, color=TEXT)),
                 height=460, margin=dict(l=16, r=16, t=60, b=16),
             )
@@ -1444,6 +1468,8 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
             fig_sankey_rf = construir_sankey(sample_filt_m["label_real"], sample_filt_m["pred_rf"], "Random Forest")
             st.plotly_chart(fig_sankey_rf, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption("Fluxo de classificação do Random Forest: azul = acertos (TN e TP), vermelho = erros (FP = falsos alarmes, FN = ataques não detetados). Espessura proporcional à % por linha.")
+            with st.expander("💡 Como interpretar este gráfico"):
+                st.markdown("Se o fluxo de Falsos Negativos for visivelmente mais espesso do que o de Falsos Positivos, isso confirma visualmente que o modelo peca por excesso de cautela — deixa passar mais ataques reais do que gera alarmes desnecessários, um trade-off que pode ser ajustado baixando o threshold de decisão, à custa de mais ruído operacional.")
             st.markdown('</div>', unsafe_allow_html=True)
 
         with c14:
@@ -1451,6 +1477,8 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
             fig_sankey_lr = construir_sankey(sample_filt_m["label_real"], sample_filt_m["pred_lr"], "Logistic Regression")
             st.plotly_chart(fig_sankey_lr, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption("Fluxo de classificação da Logistic Regression: azul = acertos (TN e TP), vermelho = erros (FP = falsos alarmes, FN = ataques não detetados). Espessura proporcional à % por linha.")
+            with st.expander("💡 Como interpretar este gráfico"):
+                st.markdown("Compara a espessura dos fluxos vermelhos com o equivalente do Random Forest — o modelo com o fluxo de Falsos Negativos proporcionalmente mais fino é o que apresenta menor risco residual de ataques não detetados, um fator importante a pesar na decisão de produção.")
             st.markdown('</div>', unsafe_allow_html=True)
 
         # ── Explicabilidade do Modelo ────────────────────────────────
@@ -1474,7 +1502,7 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
             )
             fig_importance.update_layout(
                 **{k: v for k, v in PLOTLY_LAYOUT.items() if k != "margin"},
-                title=dict(text="Fatores Mais Importantes para Deteção (Random Forest)",
+                title=dict(text="<b>Fatores Mais Importantes para Deteção (Random Forest)</b>",
                             x=0.01, xanchor="left", y=0.97, yanchor="top", font=dict(size=20, color=TEXT)),
                 height=500, margin=dict(l=16, r=16, t=60, b=16),
             )
@@ -1482,6 +1510,8 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
             st.plotly_chart(fig_importance, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption("Estas variáveis têm maior influência na deteção de anomalias pelo modelo Random Forest. "
                        "Importância calculada pela redução média de impureza (Gini) ao longo das árvores do modelo.")
+            with st.expander("💡 Como interpretar este gráfico"):
+                st.markdown("As features no topo desta lista não servem só para explicar o modelo — são também excelentes candidatas a regras de deteção complementares e independentes no SIEM (ex: alertas baseados em limiares simples sobre estas variáveis), funcionando como uma camada de defesa adicional caso o modelo de ML falhe ou seja contornado.")
             st.markdown('</div>', unsafe_allow_html=True)
         else:
             st.markdown('<div class="chart-card">', unsafe_allow_html=True)
@@ -1531,7 +1561,7 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
             fig_shap.add_vline(x=0, line_color=TEXT_MUTED, line_width=1, line_dash="dot")
             fig_shap.update_layout(
                 **{k: v for k, v in PLOTLY_LAYOUT.items() if k not in ("margin", "yaxis")},
-                title=dict(text="Impacto Individual das Features na Previsão (SHAP)",
+                title=dict(text="<b>Impacto Individual das Features na Previsão (SHAP)</b>",
                             x=0.01, xanchor="left", y=0.97, yanchor="top", font=dict(size=20, color=TEXT)),
                 xaxis_title="Impacto na previsão (← reduz risco · aumenta risco →)",
                 yaxis=dict(
@@ -1546,8 +1576,12 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
                 "Cada ponto representa um registo da amostra de referência (3.000 registos). A posição horizontal mostra "
                 "o impacto dessa feature na previsão para esse registo específico (à direita = empurra para 'anómalo'; "
                 "à esquerda = empurra para 'normal'). A cor mostra se o valor da feature, nesse registo, era baixo (azul) "
-                "ou alto (vermelho) — permite perceber, por exemplo, se valores altos de uma feature tendem a aumentar o risco previsto."
+                "ou alto (vermelho)."
             )
+            with st.expander("💡 Como interpretar este gráfico"):
+                st.markdown("Se uma feature com relação intuitiva (ex: maior volume de dados a indicar maior risco) "
+                            "mostrar pontos onde a relação é claramente o oposto do esperado, vale a pena investigar — pode ser ruído "
+                            "real nos dados, ou um sinal de fuga de informação (data leakage) no pipeline de features.")
             st.markdown('</div>', unsafe_allow_html=True)
         else:
             st.markdown('<div class="chart-card">', unsafe_allow_html=True)
