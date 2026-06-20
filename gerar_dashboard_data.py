@@ -187,12 +187,66 @@ y_prob_rf_full = rf.predict_proba(X_full_scaled)[:, 1]
 y_pred_lr_full = lr.predict(X_full_scaled)
 y_prob_lr_full = lr.predict_proba(X_full_scaled)[:, 1]
 
-print(f"  ROC-AUC Random Forest       : {roc_auc_score(y_full_real, y_prob_rf_full):.4f}")
-print(f"  ROC-AUC Logistic Regression : {roc_auc_score(y_full_real, y_prob_lr_full):.4f}")
-print("\n--- Random Forest ---")
-print(classification_report(y_full_real, y_pred_rf_full, target_names=['Normal', 'Anómalo']))
-print("\n--- Logistic Regression ---")
-print(classification_report(y_full_real, y_pred_lr_full, target_names=['Normal', 'Anómalo']))
+# ── Exportar Feature Importance (Random Forest) ────────────────────
+print("\n=== Exportar Feature Importance ===")
+feature_importance = pd.DataFrame({
+    "feature": features_modelo,
+    "importance": rf.feature_importances_,
+}).sort_values("importance", ascending=False).reset_index(drop=True)
+
+feature_importance.to_parquet("feature_importance.parquet", index=False)
+print(feature_importance.head(10))
+
+# ── Exportar Feature Importance (Random Forest) ────────────────────
+print("\n=== Exportar Feature Importance ===")
+feature_importance = pd.DataFrame({
+    "feature": features_modelo,
+    "importance": rf.feature_importances_,
+}).sort_values("importance", ascending=False).reset_index(drop=True)
+
+feature_importance.to_parquet("feature_importance.parquet", index=False)
+print(feature_importance.head(10))
+
+# ── Exportar SHAP Summary (Random Forest) ───────────────────────────
+print("\n=== Exportar SHAP Summary ===")
+import shap
+
+N_AMOSTRA_SHAP = 3000
+TOP_N_SHAP = 15
+
+rng = np.random.RandomState(42)
+idx_shap = rng.choice(len(X_full), size=min(N_AMOSTRA_SHAP, len(X_full)), replace=False)
+X_shap_raw = X_full[idx_shap]
+X_shap_scaled = scaler_modelo.transform(X_shap_raw)
+
+explainer = shap.TreeExplainer(rf)
+shap_raw = explainer.shap_values(X_shap_scaled)
+
+# Compatibilidade entre versões do SHAP (lista por classe vs array 3D)
+if isinstance(shap_raw, list):
+    shap_vals = shap_raw[1]            # classe "Anómalo"
+elif shap_raw.ndim == 3:
+    shap_vals = shap_raw[:, :, 1]
+else:
+    shap_vals = shap_raw
+
+mean_abs_shap = np.abs(shap_vals).mean(axis=0)
+top_idx = np.argsort(mean_abs_shap)[::-1][:TOP_N_SHAP]
+
+linhas_shap = []
+for i in top_idx:
+    feat = features_modelo[i]
+    for row in range(len(X_shap_raw)):
+        linhas_shap.append({
+            "feature": feat,
+            "shap_value": float(shap_vals[row, i]),
+            "feature_value": float(X_shap_raw[row, i]),
+        })
+
+shap_df = pd.DataFrame(linhas_shap)
+shap_df.to_parquet("shap_values.parquet", index=False)
+print(f"SHAP exportado: {len(shap_df):,} linhas, top {TOP_N_SHAP} features")
+print(shap_df.groupby("feature")["shap_value"].apply(lambda x: x.abs().mean()).sort_values(ascending=False))
 
 # ── 10. EXPORTAR PARQUET ──────────────────────────────────────────
 print("\n=== 8. EXPORTAR dashboard_data.parquet ===")
