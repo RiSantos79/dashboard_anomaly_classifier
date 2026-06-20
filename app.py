@@ -526,7 +526,8 @@ Esta separação evita *data leakage*: as métricas de desempenho apresentadas n
                     custom_data=["porto"],
                 )
                 fig_portos.update_traces(
-                    hovertemplate="<b>Porto %{customdata[0]}</b><br>%{y}<br>Anomalias previstas: %{x:,}<extra></extra>"
+                    hovertemplate="<b>Porto %{customdata[0]}</b><br>%{y}<br>Anomalias previstas: %{x:,}<extra></extra>",
+                    hoverlabel=dict(bgcolor=CARD_BG, bordercolor=GRID, font=dict(color=TEXT, size=12)),
                 )
                 fig_portos.update_layout(
                     **{k: v for k, v in PLOTLY_LAYOUT.items() if k != "margin"},
@@ -907,6 +908,7 @@ Os valores apresentados nesta aba combinam dados de **Treino**, **Teste** e **Fo
                     text=texto, textposition="inside",
                     textfont=dict(color=BG, size=11),
                     customdata=sub["pct"], hovertemplate=f"{risco}: " + "%{customdata:.1f}%<extra></extra>",
+                    hoverlabel=dict(bgcolor=CARD_BG, bordercolor=GRID, font=dict(color=TEXT, size=12)),
                 ))
 
             # Destaque visual do dia de pico de anomalias (mesmo dia identificado no gráfico de evolução)
@@ -1373,7 +1375,7 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
                 legend_title_text="",
                 legend=dict(
                     orientation="h",
-                    yanchor="top", y=1.17,
+                    yanchor="top", y=1.20,
                     xanchor="left", x=-0.05,
                     bgcolor="rgba(0,0,0,0)", borderwidth=0,
                     font=dict(color=TEXT, size=13),
@@ -1414,6 +1416,7 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
                     hovertemplate="%{customdata}<extra></extra>",
                 ),
                 textfont=dict(color=TEXT, size=12),
+                hoverlabel=dict(bgcolor=CARD_BG, bordercolor=GRID, font=dict(color=TEXT, size=12)),
             ))
             fig_sankey.update_layout(
                 **{k: v for k, v in PLOTLY_LAYOUT.items() if k not in ("xaxis", "yaxis", "margin")},
@@ -1511,6 +1514,7 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
                 ),
                 customdata=shap_plot["feature"],
                 hovertemplate="<b>%{customdata}</b><br>Impacto (SHAP): %{x:.4f}<extra></extra>",
+                hoverlabel=dict(bgcolor=CARD_BG, bordercolor=GRID, font=dict(color=TEXT, size=12)),
             ))
             fig_shap.add_vline(x=0, line_color=TEXT_MUTED, line_width=1, line_dash="dot")
             fig_shap.update_layout(
