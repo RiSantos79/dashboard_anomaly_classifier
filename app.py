@@ -101,6 +101,7 @@ def beeswarm_offsets(values, n_bins=30, scale=0.38):
     return offsets
 
 PLOTLY_LAYOUT = dict(
+    template="plotly_dark",
     paper_bgcolor=CARD_BG,
     plot_bgcolor=CARD_BG,
     font=dict(color=TEXT, family='sans-serif'),
@@ -536,7 +537,7 @@ Esta separação evita *data leakage*: as métricas de desempenho apresentadas n
                     height=460, margin=dict(l=16, r=16, t=60, b=16),
                 )
                 fig_portos.update_yaxes(type="category")
-                st.plotly_chart(fig_portos, use_container_width=True, config={"displayModeBar": False})
+                st.plotly_chart(fig_portos, use_container_width=True, config={"displayModeBar": False}, theme=None)
                 st.caption("Identifica os portos mais associados a comportamento anómalo, permitindo priorizar investigação no SOC.")
             else:
                 st.info("Nenhuma anomalia prevista com os filtros atuais.")
@@ -559,7 +560,7 @@ Esta separação evita *data leakage*: as métricas de desempenho apresentadas n
                             x=0.01, xanchor="left", y=0.97, yanchor="top", font=dict(size=20, color=TEXT)),
                 xaxis_title="Previsto", yaxis_title="Real", height=460, margin=dict(l=16, r=16, t=60, b=16),
             )
-            st.plotly_chart(fig_cm, use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(fig_cm, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption(f"Mostra a capacidade do modelo em identificar tráfego anómalo e normal, destacando falsos negativos e falsos positivos. **Precision: {prec:.3f} · Recall: {rec:.3f} · F1: {f1:.3f}**")
             st.markdown('</div>', unsafe_allow_html=True)
 
@@ -601,7 +602,7 @@ Esta separação evita *data leakage*: as métricas de desempenho apresentadas n
                 ),
                 margin=dict(l=16, r=16, t=100, b=16),
             )
-            st.plotly_chart(fig_tipos, use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(fig_tipos, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption("Apresenta a distribuição real de tráfego, evidenciando o desbalanceamento entre classes.")
             st.markdown('</div>', unsafe_allow_html=True)
 
@@ -661,7 +662,7 @@ Esta separação evita *data leakage*: as métricas de desempenho apresentadas n
                     margin=dict(l=16, r=16, t=100, b=16),
                 )
                 fig_recall.update_xaxes(range=[0, 122], showgrid=False, zeroline=False, showline=False, tickcolor=TEXT, color=TEXT)
-                st.plotly_chart(fig_recall, use_container_width=True, config={"displayModeBar": False})
+                st.plotly_chart(fig_recall, use_container_width=True, config={"displayModeBar": False}, theme=None)
                 st.caption("Permite identificar em que tipos de ataque o modelo tem melhor e pior desempenho.")
             else:
                 st.info("Sem anomalias reais no subset filtrado para calcular taxa de detecção.")
@@ -888,7 +889,7 @@ Os valores apresentados nesta aba combinam dados de **Treino**, **Teste** e **Fo
                 ),
                 margin=dict(l=16, r=16, t=100, b=16),
             )
-            st.plotly_chart(fig_linha, use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(fig_linha, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption("Mostra a tendência ao longo dos dias e a projeção para o próximo período (regressão linear sobre os dias filtrados, com intervalo de incerteza de ±3%). A zona sombreada destaca o dia de pico de atividade anómala.")
             st.markdown('</div>', unsafe_allow_html=True)
 
@@ -946,7 +947,7 @@ Os valores apresentados nesta aba combinam dados de **Treino**, **Teste** e **Fo
                 margin=dict(l=16, r=16, t=100, b=16),
                 uniformtext=dict(mode="show", minsize=11),
             )
-            st.plotly_chart(fig_risco_dia, use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(fig_risco_dia, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption("Quantifica a percentagem de tráfego classificado por nível de risco ao longo dos dias. Valores ≤4% não são rotulados para evitar sobreposição — passar o rato sobre a barra para ver o valor exato. A zona sombreada destaca o dia de pico de atividade anómala.")
             st.markdown('</div>', unsafe_allow_html=True)
 
@@ -983,7 +984,7 @@ Os valores apresentados nesta aba combinam dados de **Treino**, **Teste** e **Fo
                 margin=dict(l=16, r=16, t=60, b=16),
             )
             fig_box.update_traces(marker_size=3)
-            st.plotly_chart(fig_box, use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(fig_box, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption("Analisa como o modelo atribui probabilidades às diferentes classes. A linha tracejada marca o threshold de decisão (0.5).")
             st.markdown('</div>', unsafe_allow_html=True)
 
@@ -1083,7 +1084,7 @@ Os valores apresentados nesta aba combinam dados de **Treino**, **Teste** e **Fo
                             x=0.01, xanchor="left", y=0.97, yanchor="top", font=dict(size=20, color=TEXT)),
                 height=460, margin=dict(l=16, r=16, t=60, b=16),
             )
-            st.plotly_chart(fig_gauges, use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(fig_gauges, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption("Percentagem de fluxos classificados por cada nível de risco. O arco colorido mostra a proporção de cada categoria no total filtrado.")
             st.markdown('</div>', unsafe_allow_html=True)
         st.markdown("<div class='section-title'>📌 Insights e Recomendações</div>", unsafe_allow_html=True)
@@ -1265,7 +1266,7 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
                 ),
                 margin=dict(l=16, r=16, t=100, b=16),
             )
-            st.plotly_chart(fig_dumb, use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(fig_dumb, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption("Compara o desempenho dos modelos para apoiar a decisão de deployment.")
             st.markdown('</div>', unsafe_allow_html=True)
 
@@ -1308,7 +1309,7 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
                 ),
                 margin=dict(l=16, r=16, t=100, b=16),
             )
-            st.plotly_chart(fig_roc, use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(fig_roc, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption("Avalia a capacidade do modelo separar tráfego normal de anómalo. O 'x' marca o ponto correspondente ao threshold de decisão atual (0.5).")
             st.markdown('</div>', unsafe_allow_html=True)
 
@@ -1346,7 +1347,7 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
                 ),
                 margin=dict(l=16, r=16, t=100, b=16),
             )
-            st.plotly_chart(fig_violin, use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(fig_violin, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption("Distribuição das probabilidades de anomalia atribuídas pelo Random Forest, por nível de risco. A linha horizontal representa a mediana; a caixa central o intervalo interquartil. A linha tracejada marca o threshold de decisão (0.5).")
             st.markdown('</div>', unsafe_allow_html=True)
 
@@ -1382,7 +1383,7 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
                 ),
                 margin=dict(l=16, r=16, t=100, b=16),
             )
-            st.plotly_chart(fig_violin_lr, use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(fig_violin_lr, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption("Distribuição das probabilidades de anomalia atribuídas pela Logistic Regression, por nível de risco. A linha horizontal representa a mediana; a caixa central o intervalo interquartil. A linha tracejada marca o threshold de decisão (0.5).")
             st.markdown('</div>', unsafe_allow_html=True)
 
@@ -1430,14 +1431,14 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
         with c13:
             st.markdown('<div class="chart-card">', unsafe_allow_html=True)
             fig_sankey_rf = construir_sankey(sample_filt_m["label_real"], sample_filt_m["pred_rf"], "Random Forest")
-            st.plotly_chart(fig_sankey_rf, use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(fig_sankey_rf, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption("Fluxo de classificação do Random Forest: azul = acertos (TN e TP), vermelho = erros (FP = falsos alarmes, FN = ataques não detetados). Espessura proporcional à % por linha.")
             st.markdown('</div>', unsafe_allow_html=True)
 
         with c14:
             st.markdown('<div class="chart-card">', unsafe_allow_html=True)
             fig_sankey_lr = construir_sankey(sample_filt_m["label_real"], sample_filt_m["pred_lr"], "Logistic Regression")
-            st.plotly_chart(fig_sankey_lr, use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(fig_sankey_lr, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption("Fluxo de classificação da Logistic Regression: azul = acertos (TN e TP), vermelho = erros (FP = falsos alarmes, FN = ataques não detetados). Espessura proporcional à % por linha.")
             st.markdown('</div>', unsafe_allow_html=True)
 
@@ -1467,7 +1468,7 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
                 height=500, margin=dict(l=16, r=16, t=60, b=16),
             )
             fig_importance.update_xaxes(range=[0, top_features["importance"].max() * 1.25])
-            st.plotly_chart(fig_importance, use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(fig_importance, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption("Estas variáveis têm maior influência na deteção de anomalias pelo modelo Random Forest. "
                        "Importância calculada pela redução média de impureza (Gini) ao longo das árvores do modelo.")
             st.markdown('</div>', unsafe_allow_html=True)
@@ -1529,7 +1530,7 @@ Os filtros de Split nesta aba permitem isolar cada grupo e confirmar que o desem
                 ),
                 height=560, margin=dict(l=16, r=16, t=60, b=16),
             )
-            st.plotly_chart(fig_shap, use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(fig_shap, use_container_width=True, config={"displayModeBar": False}, theme=None)
             st.caption(
                 "Cada ponto representa um registo da amostra de referência (3.000 registos). A posição horizontal mostra "
                 "o impacto dessa feature na previsão para esse registo específico (à direita = empurra para 'anómalo'; "
