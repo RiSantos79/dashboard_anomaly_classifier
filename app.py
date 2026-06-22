@@ -314,31 +314,53 @@ if "papel_ativo" not in st.session_state:
     st.session_state["papel_ativo"] = None
 
 if st.session_state["papel_ativo"] is None:
+    # CSS para ocultar sidebar, header e forçar fundo escuro na página de login
     st.markdown(f"""
-    <div style='min-height:100vh;display:flex;align-items:center;justify-content:center;background:{BG}'>
-        <div style='background:{CARD_BG};border:1px solid {GRID};border-radius:12px;padding:48px 56px;max-width:420px;width:100%;text-align:center'>
-            <div style='font-size:36px;margin-bottom:8px'>🛡️</div>
-            <div style='font-size:20px;font-weight:700;color:{TEXT};margin-bottom:4px'>Anomaly Classifier</div>
-            <div style='font-size:13px;color:{TEXT_MUTED};margin-bottom:32px'>Dashboard Interativo — CICIDS2017</div>
+    <style>
+        section[data-testid="stSidebar"] {{ display: none !important; }}
+        header[data-testid="stHeader"] {{ display: none !important; }}
+        .block-container {{ padding: 0 !important; max-width: 100% !important; }}
+        .stApp {{ background: {BG} !important; }}
+        div[data-testid="stForm"] {{
+            max-width: 360px !important;
+            margin: 0 auto !important;
+            border: none !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            background: transparent !important;
+        }}
+        div[data-testid="stForm"] > div {{ padding: 0 !important; }}
+    </style>
+    <div style="min-height:40vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:24px">
+        <div style="background:{CARD_BG};border:1px solid {GRID};border-radius:16px;padding:40px 40px 32px;width:360px;box-shadow:0 8px 32px rgba(0,0,0,0.4);text-align:center">
+            <div style="width:72px;height:72px;background:linear-gradient(135deg,{BLUE},#3a6bc4);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:32px;box-shadow:0 4px 16px rgba(91,141,217,0.4)">🛡️</div>
+            <div style="font-size:22px;font-weight:800;color:{TEXT};margin-bottom:4px">Anomaly Classifier</div>
+            <div style="font-size:12px;color:{TEXT_MUTED};letter-spacing:0.5px">Dashboard Interativo · CICIDS2017</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    with st.form("login_form"):
-        st.markdown(f"<div style='font-size:13px;color:{TEXT_MUTED};margin-bottom:8px'>Utilizador</div>", unsafe_allow_html=True)
-        utilizador = st.selectbox("Papel", options=list(PAPEIS.keys()),
-                                   format_func=lambda x: PAPEIS[x]["label"],
-                                   label_visibility="collapsed")
-        st.markdown(f"<div style='font-size:13px;color:{TEXT_MUTED};margin:12px 0 8px'>Password</div>", unsafe_allow_html=True)
-        password = st.text_input("Password", type="password", label_visibility="collapsed")
-        submitted = st.form_submit_button("Entrar", use_container_width=True)
+    _, col_mid, _ = st.columns([1, 1.2, 1])
+    with col_mid:
+        with st.form("login_form"):
+            st.markdown(f"<div style='font-size:12px;color:{TEXT_MUTED};text-transform:uppercase;letter-spacing:1px;margin-bottom:6px'>Perfil</div>", unsafe_allow_html=True)
+            utilizador = st.selectbox("Papel", options=list(PAPEIS.keys()),
+                                       format_func=lambda x: PAPEIS[x]["label"],
+                                       label_visibility="collapsed")
+            st.markdown(f"<div style='font-size:12px;color:{TEXT_MUTED};text-transform:uppercase;letter-spacing:1px;margin:16px 0 6px'>Password</div>", unsafe_allow_html=True)
+            password = st.text_input("Password", type="password",
+                                      placeholder="••••••••",
+                                      label_visibility="collapsed")
+            st.markdown("<div style='margin-top:8px'></div>", unsafe_allow_html=True)
+            submitted = st.form_submit_button("🔐  Entrar", use_container_width=True)
 
-        if submitted:
-            if password == PAPEIS[utilizador]["password"]:
-                st.session_state["papel_ativo"] = utilizador
-                st.rerun()
-            else:
-                st.error("Password incorreta. Tenta novamente.")
+            if submitted:
+                if password == PAPEIS[utilizador]["password"]:
+                    st.session_state["papel_ativo"] = utilizador
+                    st.session_state["aba_ativa"] = PAPEIS[utilizador]["abas"][-1]
+                    st.rerun()
+                else:
+                    st.error("Password incorreta.")
     st.stop()
 
 # Papel ativo — determina abas disponíveis
@@ -443,7 +465,7 @@ if aba_ativa == "🚨 Operacional / SOC":
     st.sidebar.markdown(f"<div style='color:{BLUE};font-size:18px;font-weight:700;padding:8px 0'>🚨 Filtros — Operacional</div>", unsafe_allow_html=True)
 
     st.sidebar.markdown(f"<div style='font-size:12px;color:{TEXT_MUTED};text-transform:uppercase;letter-spacing:1px;margin-bottom:6px'>Modelo</div>", unsafe_allow_html=True)
-    modelo_label = st.sidebar.radio("Modelo", ["Random Forest", "Logistic Regression"], key="modelo_soc")
+    modelo_label = st.sidebar.radio("Modelo", ["Logistic Regression", "Random Forest"], key="modelo_soc")
     suf = "rf" if modelo_label == "Random Forest" else "lr"
 
     st.sidebar.markdown("---")
@@ -803,7 +825,7 @@ Se nenhuma destas condições se verificar, é mostrada a mensagem "sem alertas 
 elif aba_ativa == "📈 Tendências / Gestão":
     st.sidebar.markdown(f"<div style='color:{ORANGE};font-size:18px;font-weight:700;padding:8px 0'>📈 Filtros — Tendências</div>", unsafe_allow_html=True)
 
-    modelo_label_t = st.sidebar.radio("Modelo", ["Random Forest", "Logistic Regression"], key="modelo_tendencias")
+    modelo_label_t = st.sidebar.radio("Modelo", ["Logistic Regression", "Random Forest"], key="modelo_tendencias")
     suf_t = "rf" if modelo_label_t == "Random Forest" else "lr"
 
     st.sidebar.markdown("---")
