@@ -297,6 +297,55 @@ if not HAS_SPLIT:
     df["split"] = "Fora da Amostra"
 agg_dia, agg_ataque, agg_porto, df_sample = build_aggregates(df)
 
+# ── Sistema de Login e Controlo de Acesso por Papel ──────────────
+PAPEIS = {
+    "operador":       {"password": st.secrets.get("PASS_OPERADOR", "op2026"),
+                       "label": "🛡️ Operador SOC",
+                       "abas": ["🚨 Operacional / SOC"]},
+    "supervisao":     {"password": st.secrets.get("PASS_SUPERVISAO", "sup2026"),
+                       "label": "📊 Supervisão",
+                       "abas": ["🚨 Operacional / SOC", "📈 Tendências / Gestão"]},
+    "administracao":  {"password": st.secrets.get("PASS_ADMIN", "adm2026"),
+                       "label": "⚙️ Administração",
+                       "abas": ["🚨 Operacional / SOC", "📈 Tendências / Gestão", "⚖️ Comparação de Modelos"]},
+}
+
+if "papel_ativo" not in st.session_state:
+    st.session_state["papel_ativo"] = None
+
+if st.session_state["papel_ativo"] is None:
+    st.markdown(f"""
+    <div style='min-height:100vh;display:flex;align-items:center;justify-content:center;background:{BG}'>
+        <div style='background:{CARD_BG};border:1px solid {GRID};border-radius:12px;padding:48px 56px;max-width:420px;width:100%;text-align:center'>
+            <div style='font-size:36px;margin-bottom:8px'>🛡️</div>
+            <div style='font-size:20px;font-weight:700;color:{TEXT};margin-bottom:4px'>Anomaly Classifier</div>
+            <div style='font-size:13px;color:{TEXT_MUTED};margin-bottom:32px'>Dashboard Interativo — CICIDS2017</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    with st.form("login_form"):
+        st.markdown(f"<div style='font-size:13px;color:{TEXT_MUTED};margin-bottom:8px'>Utilizador</div>", unsafe_allow_html=True)
+        utilizador = st.selectbox("Papel", options=list(PAPEIS.keys()),
+                                   format_func=lambda x: PAPEIS[x]["label"],
+                                   label_visibility="collapsed")
+        st.markdown(f"<div style='font-size:13px;color:{TEXT_MUTED};margin:12px 0 8px'>Password</div>", unsafe_allow_html=True)
+        password = st.text_input("Password", type="password", label_visibility="collapsed")
+        submitted = st.form_submit_button("Entrar", use_container_width=True)
+
+        if submitted:
+            if password == PAPEIS[utilizador]["password"]:
+                st.session_state["papel_ativo"] = utilizador
+                st.rerun()
+            else:
+                st.error("Password incorreta. Tenta novamente.")
+    st.stop()
+
+# Papel ativo — determina abas disponíveis
+papel = st.session_state["papel_ativo"]
+abas_disponiveis = PAPEIS[papel]["abas"]
+label_papel = PAPEIS[papel]["label"]
+
 # ── Score de Saúde Global (RF, amostra completa, sem filtros) ──────
 cm_global = confusion_matrix(df_sample["label_real"], df_sample["pred_rf"], labels=[0, 1])
 tn_g, fp_g, fn_g, tp_g = cm_global[0][0], cm_global[0][1], cm_global[1][0], cm_global[1][1]
@@ -365,11 +414,25 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-if "aba_ativa" not in st.session_state:
-    st.session_state["aba_ativa"] = "🚨 Operacional / SOC"
+if "aba_ativa" not in st.session_state or st.session_state["aba_ativa"] not in abas_disponiveis:
+    st.session_state["aba_ativa"] = abas_disponiveis[0]
+
+# Botão de logout e papel ativo na sidebar
+with st.sidebar:
+    st.markdown(f"""
+    <div style='padding:10px 0 4px'>
+        <div style='font-size:11px;color:{TEXT_MUTED};text-transform:uppercase;letter-spacing:1px'>Sessão ativa</div>
+        <div style='font-size:14px;font-weight:700;color:{TEXT};margin-top:4px'>{label_papel}</div>
+    </div>
+    """, unsafe_allow_html=True)
+    if st.button("🔓 Terminar sessão", use_container_width=True):
+        st.session_state["papel_ativo"] = None
+        st.session_state["aba_ativa"] = "🚨 Operacional / SOC"
+        st.rerun()
+    st.markdown("---")
 
 aba_ativa = st.radio(
-    "Navegação", ["🚨 Operacional / SOC", "📈 Tendências / Gestão", "⚖️ Comparação de Modelos"],
+    "Navegação", abas_disponiveis,
     key="aba_ativa", horizontal=True, label_visibility="collapsed",
 )
 
@@ -574,9 +637,10 @@ Esta separação evita *data leakage*: as métricas de desempenho apresentadas n
                 xaxis_title="Previsto", yaxis_title="Real", height=460, margin=dict(l=16, r=16, t=60, b=16),
             )
             st.plotly_chart(fig_cm, use_container_width=True, config={"displayModeBar": False}, theme=None)
-            st.caption(f"Mostra a capacidade do modelo em identificar tráfego anómalo e normal, destacando falsos negativos e falsos positivos. **Precision: {prec:.3f} · Recall: {rec:.3f} · F1: {f1:.3f}**")
+            st.caption("Mostra a capacidade do modelo em identificar tráfego anómalo e normal, destacando falsos negativos e falsos positivos.")
             with st.expander("💡 Como interpretar este gráfico"):
-                st.markdown("O quadrante de Falsos Negativos (FN) merece sempre mais atenção do que os restantes três — representa ataques reais que o modelo deixou passar como tráfego normal. Um FN elevado, mesmo acompanhado de Precision alta, é sinal de um modelo demasiado conservador, que prefere não alarmar a arriscar falsos positivos — e isso tem um custo direto em segurança.")
+                st.markdown(f"**Precision: {prec:.3f} · Recall: {rec:.3f} · F1: {f1:.3f}**\n\n"
+                            "O quadrante de Falsos Negativos (FN) merece sempre mais atenção do que os restantes três — representa ataques reais que o modelo deixou passar como tráfego normal. Um FN elevado, mesmo acompanhado de Precision alta, é sinal de um modelo demasiado conservador, que prefere não alarmar a arriscar falsos positivos — e isso tem um custo direto em segurança.")
             st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown("<div class='section-title'>Tipos de Ataque — Detecção por Classe</div>", unsafe_allow_html=True)
